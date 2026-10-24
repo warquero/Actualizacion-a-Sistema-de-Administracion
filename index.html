@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Inventario ShuryStore · Taller de Sublimación</title>
+    <meta name="description" content="PWA para control de inventario, saldo en cuenta (Bs. y USD), clientes y proveedores de ShuryStore en Venezuela." />
+    
+    <!-- OpenGraph & Twitter Cards -->
+    <meta property="og:title" content="Inventario ShuryStore · Taller de Sublimación" />
+    <meta property="og:description" content="PWA para control de inventario, saldo en cuenta (Bs. y USD), clientes y proveedores de ShuryStore en Venezuela." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+
+    <!-- PWA Settings -->
+    <meta name="theme-color" content="#160f20" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ShuryStore" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Encabezado Principal -->
+    <header class="app-header">
+      <div class="header-container">
+        <a href="#" class="brand-section" id="brandBtn">
+          <img src="/logo.png" alt="ShuryStore Logo" class="brand-logo-img" />
+          <div class="brand-title">
+            <span>ShuryStore</span>
+            <span class="brand-subtitle">Taller Sublimación · Beta</span>
+          </div>
+        </a>
+
+        <div class="header-actions">
+          <!-- Tasa BCV Pill -->
+          <div class="bcv-pill" id="bcvPill" title="Tasa oficial del BCV vigente">
+            <span>💵 BCV:</span>
+            <span id="headerBcvVal">56,45 Bs.</span>
+          </div>
+
+          <!-- Usuario y Rol actual -->
+          <button class="user-badge" id="userBadgeBtn" title="Cambiar usuario o rol">
+            <span id="userBadgeRoleIcon">⚙️</span>
+            <span id="userBadgeName">Técnico</span>
+            <span id="userBadgeRole" class="user-role-tecnico">(Técnico)</span>
+          </button>
+
+          <!-- Botón de Instalación PWA (oculto si ya está instalado) -->
+          <button class="btn-install-pwa" id="btnInstallPwa" style="display: none;">
+            <span>⬇ Instalar</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Banner de Modo Offline -->
+    <div class="offline-banner" id="offlineBanner" style="display: none;">
+      <span>⚠️ Modo sin conexión: utilizando datos guardados en caché local.</span>
+    </div>
+
+    <!-- Contenedor Principal de la App -->
+    <main class="main-content">
+      <!-- ============================================== -->
+      <!-- PESTAÑA 1: INVENTARIO                          -->
+      <!-- ============================================== -->
+      <section class="tab-pane active" id="pane-inventario">
+        <div class="section-top">
+          <h1 class="section-title">
+            <span>📦 Inventario de Sublimación</span>
+          </h1>
+          <div class="action-buttons-group">
+            <button class="btn btn-primary" id="btnOpenCompra">
+              <span>🛒 Compra producto</span>
+            </button>
+            <button class="btn btn-secondary" id="btnOpenPedido">
+              <span>📦 Pedido</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnOpenEntrada">
+              <span>＋ Entrada</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnOpenSalida">
+              <span>− Salida</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnOpenNuevoMaterial">
+              <span>＋ Producto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Búsqueda y Filtros de Inventario -->
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchMaterial" placeholder="Buscar insumos (tazas, franelas, papel, tintas...)" />
+          </div>
+          <div class="filter-row">
+            <select class="filter-select" id="filterStockStatus">
+              <option value="todos">Todos los productos</option>
+              <option value="bajo">Stock bajo (menor al mínimo)</option>
+              <option value="cero">Agotados (Stock en 0)</option>
+            </select>
+            <span class="form-helper" id="materialCountLabel">Cargando catálogo...</span>
+          </div>
+        </div>
+
+        <!-- Catálogo de Productos / Materiales -->
+        <div class="product-grid" id="productGrid">
+          <!-- Renderizado dinámico desde app.js -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PESTAÑA 2: BANCO (CUENTA Y CAJA)               -->
+      <!-- ============================================== -->
+      <section class="tab-pane" id="pane-banco">
+        <div class="section-top">
+          <h1 class="section-title">
+            <span>🏦 Cuenta y Caja</span>
+          </h1>
+          <div class="action-buttons-group">
+            <!-- Saldo Inicial: Solo visible/operable por el rol 'tecnico' -->
+            <button class="btn btn-secondary" id="btnOpenSaldoInicial" style="border-color: #f59e0b;">
+              <span>＋ Saldo inicial</span>
+            </button>
+            <button class="btn btn-success" id="btnOpenIngreso">
+              <span>＋ Ingreso</span>
+            </button>
+            <button class="btn btn-danger" id="btnOpenEgreso">
+              <span>− Egreso</span>
+            </button>
+            <button class="btn btn-secondary" id="btnOpenAjuste">
+              <span>± Ajuste</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Resumen de Saldo en Cuenta -->
+        <div class="stats-banner">
+          <div class="stat-card stat-green">
+            <div class="stat-label">Saldo Total en Cuenta</div>
+            <div class="stat-value-bs" id="totalSaldoBs">0,00 Bs.</div>
+            <div class="stat-value-usd" id="totalSaldoUsd">≈ 0,00 US$</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total del Filtro Actual</div>
+            <div class="stat-value-bs" id="filtroSaldoBs">0,00 Bs.</div>
+            <div class="stat-value-usd" id="filtroSaldoUsd">≈ 0,00 US$</div>
+          </div>
+        </div>
+
+        <!-- Filtros de la Cuenta -->
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchBanco" placeholder="Buscar por concepto, referencia o factura..." />
+          </div>
+          <div class="filter-row">
+            <select class="filter-select" id="filterBancoTipo">
+              <option value="todos">Todos los movimientos</option>
+              <option value="inicial">Saldo inicial</option>
+              <option value="entrada">Ingresos (entradas)</option>
+              <option value="salida">Egresos (salidas)</option>
+              <option value="ajuste">Ajustes</option>
+            </select>
+            <input type="date" class="filter-date" id="filterBancoFechaDesde" title="Fecha de operación desde" />
+            <input type="date" class="filter-date" id="filterBancoFechaHasta" title="Fecha de operación hasta" />
+            <button class="btn btn-secondary btn-sm" id="btnResetBancoFilters">Limpiar filtros</button>
+          </div>
+        </div>
+
+        <!-- Historial de Movimientos de Cuenta con Antes / Después -->
+        <div class="movement-list" id="bancoList">
+          <!-- Renderizado dinámico desde app.js -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PESTAÑA 3: CLIENTES                            -->
+      <!-- ============================================== -->
+      <section class="tab-pane" id="pane-clientes">
+        <div class="section-top">
+          <h1 class="section-title">
+            <span>👥 Cartera de Clientes</span>
+          </h1>
+          <div class="action-buttons-group">
+            <button class="btn btn-primary" id="btnOpenNuevoCliente">
+              <span>＋ Registrar Cliente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchClientes" placeholder="Buscar clientes por nombre, teléfono o notas..." />
+          </div>
+        </div>
+
+        <!-- Grid de Clientes -->
+        <div class="product-grid" id="clientesGrid">
+          <!-- Renderizado dinámico desde app.js -->
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- PESTAÑA 4: PROVEEDORES                         -->
+      <!-- ============================================== -->
+      <section class="tab-pane" id="pane-proveedores">
+        <div class="section-top">
+          <h1 class="section-title">
+            <span>🚚 Directorio de Proveedores</span>
+          </h1>
+          <div class="action-buttons-group">
+            <button class="btn btn-primary" id="btnOpenNuevoProveedor">
+              <span>＋ Nuevo Proveedor</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchProveedores" placeholder="Buscar proveedores por nombre, material o dirección..." />
+          </div>
+          <span class="form-helper">Directorio 100% independiente. Toca cualquier proveedor para desplegar detalles y redes.</span>
+        </div>
+
+        <!-- Lista Desplegable de Proveedores -->
+        <div id="proveedoresList">
+          <!-- Renderizado dinámico desde app.js -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Barra de Navegación Inferior (Mobile-First Bottom Nav) -->
+    <nav class="bottom-nav">
+      <button class="nav-tab-btn active" data-tab="pane-inventario">
+        <span class="tab-icon">🛒</span>
+        <span>Inventario</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="pane-banco">
+        <span class="tab-icon">🏦</span>
+        <span>Banco</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="pane-clientes">
+        <span class="tab-icon">👥</span>
+        <span>Clientes</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="pane-proveedores">
+        <span class="tab-icon">🚚</span>
+        <span>Proveedores</span>
+      </button>
+    </nav>
+
+    <!-- ============================================== -->
+    <!-- MODALES DE LA APLICACIÓN                       -->
+    <!-- ============================================== -->
+
+    <!-- Modal 1: Compra Producto (Factura Multi-línea) -->
+    <div class="modal-overlay" id="modalCompra">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">🛒 Compra de Productos (Factura)</h2>
+          <button class="modal-close-btn" data-close="modalCompra">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Fecha de Operación</label>
+            <input type="date" class="form-input" id="compraFecha" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nro. de Factura</label>
+            <input type="text" class="form-input" id="compraFactura" placeholder="Ej: FAC-89421" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referencia Bancaria</label>
+            <input type="text" class="form-input" id="compraReferencia" placeholder="Ej: 009842" />
+          </div>
+
+          <hr style="border: none; border-top: 1px solid var(--border-color); margin: 6px 0;" />
+          
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" style="margin: 0;">Líneas de la Factura</label>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnAddCompraLine">＋ Agregar producto</button>
+          </div>
+
+          <div id="compraLinesContainer" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Líneas de compra dinámicas -->
+          </div>
+
+          <div class="form-group" style="margin-top: 8px;">
+            <label class="form-label">Total Factura (Bs.)</label>
+            <input type="text" class="form-input amount-format" id="compraTotalBs" placeholder="0,00" />
+            <span class="form-helper" id="compraCostoCalc">Costo unitario automático: Calculando...</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comisión Bancaria (Bs.) - Opcional</label>
+            <input type="text" class="form-input amount-format" id="compraComisionBs" placeholder="0,00" />
+            <span class="form-helper">Se registra como movimiento bancario separado si es mayor a 0.</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalCompra">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarCompra">Registrar Compra</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 2: Pedido / Venta a Cliente -->
+    <div class="modal-overlay" id="modalPedido">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">📦 Registrar Pedido</h2>
+          <button class="modal-close-btn" data-close="modalPedido">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Cliente</label>
+            <select class="form-select" id="pedidoClienteSelect">
+              <option value="">-- Seleccionar Cliente --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha del Pedido</label>
+            <input type="date" class="form-input" id="pedidoFecha" />
+          </div>
+
+          <hr style="border: none; border-top: 1px solid var(--border-color); margin: 6px 0;" />
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" style="margin: 0;">Productos a Entregar</label>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnAddPedidoLine">＋ Agregar ítem</button>
+          </div>
+
+          <div id="pedidoLinesContainer" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Líneas de pedido dinámicas -->
+          </div>
+
+          <div class="form-group" style="margin-top: 8px;">
+            <label class="form-label">Total Cobrado (Bs.)</label>
+            <input type="text" class="form-input amount-format" id="pedidoTotalBs" placeholder="0,00" />
+            <span class="form-helper" id="pedidoUsdEquiv">Equivalente: 0,00 US$</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nro. de Factura / Recibo</label>
+            <input type="text" class="form-input" id="pedidoFactura" placeholder="Ej: REC-0042" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referencia Bancaria / Pago Móvil</label>
+            <input type="text" class="form-input" id="pedidoReferencia" placeholder="Ej: 5412" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalPedido">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarPedido">Confirmar Pedido</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 3: Movimiento Rápido de Stock (Entrada / Salida) -->
+    <div class="modal-overlay" id="modalStockMov">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalStockMovTitle">＋ Entrada de Stock</h2>
+          <button class="modal-close-btn" data-close="modalStockMov">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="stockMovTipo" value="entrada" />
+          <div class="form-group">
+            <label class="form-label">Producto / Material</label>
+            <select class="form-select" id="stockMovMaterialSelect"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cantidad</label>
+            <input type="number" step="any" min="0.01" class="form-input" id="stockMovCantidad" placeholder="Ej: 10" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Motivo</label>
+            <input type="text" class="form-input" id="stockMovMotivo" placeholder="Ej: Ajuste de conteo físico, merma, prueba de calor..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de Operación</label>
+            <input type="date" class="form-input" id="stockMovFecha" />
+          </div>
+          <span class="form-helper">Nota: Las entradas/salidas simples de stock no alteran el saldo bancario.</span>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalStockMov">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarStockMov">Guardar Movimiento</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 4: Movimiento de Banco (Saldo Inicial, Ingreso, Egreso, Ajuste) -->
+    <div class="modal-overlay" id="modalBancoMov">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalBancoMovTitle">＋ Movimiento Bancario</h2>
+          <button class="modal-close-btn" data-close="modalBancoMov">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="bancoMovTipo" value="ingreso" />
+          <div class="form-group">
+            <label class="form-label">Monto (Bs.)</label>
+            <input type="text" class="form-input amount-format" id="bancoMovMontoBs" placeholder="0,00" />
+            <span class="form-helper">Escribe los dígitos y se formateará en céntimos automáticamente.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Concepto</label>
+            <input type="text" class="form-input" id="bancoMovConcepto" placeholder="Ej: Pago de servicios, flete, anticipo..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referencia Bancaria</label>
+            <input type="text" class="form-input" id="bancoMovReferencia" placeholder="Ej: 004128" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nro. de Factura</label>
+            <input type="text" class="form-input" id="bancoMovFactura" placeholder="Ej: FAC-129" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de Operación</label>
+            <input type="date" class="form-input" id="bancoMovFecha" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalBancoMov">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarBancoMov">Registrar en Banco</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 5: Editar Movimiento con Rastro (Regla de Oro) -->
+    <div class="modal-overlay" id="modalEditarMov">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">✎ Corregir Movimiento</h2>
+          <button class="modal-close-btn" data-close="modalEditarMov">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editMovId" />
+          <input type="hidden" id="editGrupoId" />
+          <input type="hidden" id="editTabla" />
+          <div class="form-group">
+            <label class="form-label">Concepto / Motivo</label>
+            <input type="text" class="form-input" id="editConcepto" />
+          </div>
+          <div class="form-group" id="editMontoGroup">
+            <label class="form-label">Monto (Bs.)</label>
+            <input type="text" class="form-input amount-format" id="editMontoBs" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referencia Bancaria</label>
+            <input type="text" class="form-input" id="editReferencia" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nro. Factura</label>
+            <input type="text" class="form-input" id="editFactura" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de Operación</label>
+            <input type="date" class="form-input" id="editFecha" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="color: #fbbf24;">Motivo de la Corrección (Rastro en auditoría)</label>
+            <input type="text" class="form-input" id="editMotivoCorreccion" placeholder="Explica por qué se realiza esta corrección..." />
+          </div>
+          <span class="form-helper">Los movimientos no se borran: esta edición quedará anotada en la tabla 'ediciones'.</span>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalEditarMov">Cancelar</button>
+          <button class="btn btn-primary" id="btnConfirmarEdicion">Guardar Corrección</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 6: Proveedor (Crear / Editar) -->
+    <div class="modal-overlay" id="modalProveedor">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalProveedorTitle">🚚 Nuevo Proveedor</h2>
+          <button class="modal-close-btn" data-close="modalProveedor">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="provId" />
+          <div class="form-group">
+            <label class="form-label">Nombre del Proveedor *</label>
+            <input type="text" class="form-input" id="provNombre" placeholder="Ej: Inversiones SubliMax C.A." required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono de Contacto</label>
+            <input type="text" class="form-input" id="provContacto" placeholder="Ej: 0414 123 4567" />
+            <span class="form-helper">Móviles venezolanos (0414, 0424, 0412, etc.) habilitan WhatsApp directo automáticamente.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dirección</label>
+            <textarea class="form-textarea" id="provDireccion" placeholder="Dirección física o enlace de Google Maps..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">¿Qué vende? (Tipo de material) *</label>
+            <input type="text" class="form-input" id="provTipoMaterial" placeholder="Ej: Tazas blancas 11oz, tintas Epson sublimación, vinil textil..." required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horario de Atención</label>
+            <input type="text" class="form-input" id="provHorario" placeholder="Ej: Lunes a Viernes 8:30 AM a 4:30 PM" />
+          </div>
+          <hr style="border: none; border-top: 1px solid var(--border-color); margin: 6px 0;" />
+          <label class="form-label">Redes Sociales (opcional)</label>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.72rem;">Instagram</label>
+            <input type="text" class="form-input" id="provInstagram" placeholder="@usuario o enlace completo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.72rem;">TikTok</label>
+            <input type="text" class="form-input" id="provTiktok" placeholder="@usuario o enlace completo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.72rem;">Facebook</label>
+            <input type="text" class="form-input" id="provFacebook" placeholder="página o enlace completo" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalProveedor">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarProveedor">Guardar Proveedor</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 7: Cliente (Crear / Editar) -->
+    <div class="modal-overlay" id="modalCliente">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalClienteTitle">👤 Registrar Cliente</h2>
+          <button class="modal-close-btn" data-close="modalCliente">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="clienteId" />
+          <div class="form-group">
+            <label class="form-label">Nombre del Cliente / Empresa *</label>
+            <input type="text" class="form-input" id="clienteNombre" placeholder="Ej: Colegio San Ignacio / María Gómez" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono</label>
+            <input type="text" class="form-input" id="clienteTelefono" placeholder="Ej: 0412 9988776" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notas / Preferencias</label>
+            <textarea class="form-textarea" id="clienteNotas" placeholder="Preferencia de franelas talla M, colores corporativos..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalCliente">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 8: Nuevo Material / Producto -->
+    <div class="modal-overlay" id="modalNuevoMaterial">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">＋ Registrar Nuevo Producto</h2>
+          <button class="modal-close-btn" data-close="modalNuevoMaterial">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Nombre del Producto / Insumo *</label>
+            <input type="text" class="form-input" id="matNombre" placeholder="Ej: Tazas Mágicas Negras 11oz" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unidad de Medida</label>
+            <select class="form-select" id="matUnidad">
+              <option value="unidades">Unidades</option>
+              <option value="paquetes">Paquetes</option>
+              <option value="metros">Metros</option>
+              <option value="rollos">Rollos</option>
+              <option value="sets">Sets / Kits</option>
+              <option value="litros">Litros</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock Mínimo de Alerta</label>
+            <input type="number" class="form-input" id="matStockMin" value="5" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Costo Referencial (Bs.)</label>
+            <input type="text" class="form-input amount-format" id="matCostoBs" placeholder="0,00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Precio de Venta Sugerido (Bs.)</label>
+            <input type="text" class="form-input amount-format" id="matPrecioVentaBs" placeholder="0,00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" id="matDescripcion" placeholder="Detalles de calidad, compatibilidad con plancha..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalNuevoMaterial">Cancelar</button>
+          <button class="btn btn-primary" id="btnGuardarNuevoMaterial">Crear Producto</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 9: Tasa BCV Oficial (Gestión y Consulta) -->
+    <div class="modal-overlay" id="modalBcv">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">💵 Tasa Oficial BCV</h2>
+          <button class="modal-close-btn" data-close="modalBcv">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Fecha de la Tasa</label>
+            <input type="date" class="form-input" id="bcvFecha" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Valor en Bolívares (Bs. por 1 US$)</label>
+            <input type="number" step="0.0001" class="form-input" id="bcvValor" placeholder="Ej: 56.4520" />
+            <span class="form-helper">La tasa del BCV maneja 4 decimales.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fuente</label>
+            <input type="text" class="form-input" id="bcvFuente" value="BCV Oficial" />
+          </div>
+          <div id="bcvPermisoMsg" class="form-helper" style="color: #f59e0b;">
+            <!-- Indicador de permisos -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalBcv">Cerrar</button>
+          <button class="btn btn-primary" id="btnGuardarBcv">Actualizar Tasa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 10: Cambiar Usuario (4 usuarios: 3 Admins y 1 Técnico) -->
+    <div class="modal-overlay" id="modalUserSwitch">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">⚙️ Cambiar Usuario (Testing)</h2>
+          <button class="modal-close-btn" data-close="modalUserSwitch">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="form-helper">Selecciona el perfil activo para verificar los permisos de técnico y admin:</p>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;" id="userSelectionList">
+            <!-- Lista de usuarios renderizada dinámicamente -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalUserSwitch">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 11: Guía de Instalación en iOS Safari -->
+    <div class="modal-overlay" id="modalIosGuide">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">Instalar ShuryStore en iPhone / iPad</h2>
+          <button class="modal-close-btn" data-close="modalIosGuide">&times;</button>
+        </div>
+        <div class="modal-body" style="line-height: 1.6; font-size: 0.88rem;">
+          <p>Para tener ShuryStore en tu pantalla de inicio como una aplicación nativa:</p>
+          <ol style="margin-left: 20px; margin-top: 8px;">
+            <li>Toca el botón <strong>Compartir</strong> (icono de cuadrado con flecha hacia arriba) en la barra de Safari.</li>
+            <li>Desplaza hacia abajo y selecciona <strong>Agregar a pantalla de inicio</strong>.</li>
+            <li>Confirma tocando <strong>Agregar</strong> arriba a la derecha.</li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary btn-block" data-close="modalIosGuide">Entendido</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 12: Rastro de Auditoría (Ediciones) -->
+    <div class="modal-overlay" id="modalEdicionesRastro">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">ℹ️ Rastro de Ediciones</h2>
+          <button class="modal-close-btn" data-close="modalEdicionesRastro">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="edicionesRastroList" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Contenido del rastro -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-close="modalEdicionesRastro">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor de Alertas Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts de la Aplicación -->
+    <script src="/config.js"></script>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

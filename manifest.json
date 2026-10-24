@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "Inventario ShuryStore",
+  "short_name": "ShuryStore",
+  "description": "App para control de inventario, saldo en cuenta (Bs. y USD), clientes y proveedores de ShuryStore.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#160f20",
+  "theme_color": "#160f20",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Inventario ShuryStore",
+  "description": "PWA para control de inventario, saldo en cuenta (Bs. y USD), clientes y proveedores para taller de sublimación ShuryStore en Venezuela.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,11 +1,25 @@
-<div align="center">
+# Guía Operativa - Inventario ShuryStore PWA
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Aplicación Web Progresiva (PWA) para el taller de sublimación **ShuryStore** (Venezuela).
 
-  <h1>Built with AI Studio</h2>
+## Características Principales
+* 📱 **Mobile-First & PWA**: Instalable en celulares Android / iOS, cacheo offline completo con Service Worker (`sw.js`).
+* 🎨 **Diseño Moderno**: Tema morado (`#7c3aed`), fondo oscuro (`#160f20`), contraste optimizado para iluminación de taller.
+* 📦 **Inventario Sublimación**: Compras multi-línea con buscador, pedidos a clientes, entradas y salidas de stock.
+* 🏦 **Banco y Caja**: Moneda local en Bolívares (`Bs.`) y contravalor en dólares (`US$`). Historial detallado con cálculo de saldo antes/después por movimiento.
+* 👥 **Clientes y Proveedores**: Historial de pedidos por cliente; proveedores con WhatsApp directo (`wa.me`), Google Maps y redes sociales.
+* 🛡️ **Regla de Oro**: Ningún movimiento se borra. Registro de auditoría en la tabla `ediciones`. El stock y el saldo se calculan en vivo desde el historial.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Usuarios de Prueba (Testing / Beta)
+* **Técnico**: `tecnico` (Permisos para registrar/corregir saldo inicial y actualizar tasa BCV).
+* **Admins**: `shury`, `carlos`, `maria` (Operación diaria de taller).
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Configuración de Supabase
+1. Ingresa en tu proyecto de [Supabase](https://supabase.com).
+2. Ejecuta las migraciones contenidas en la carpeta `/db` en el SQL Editor (desde `000_baseline.sql` hasta `018_factura.sql`).
+3. (Opcional) Carga los datos de prueba ejecutando `carga-inicial/carga_inicial.sql`.
+4. Copia tu URL y anon key en `config.js`.
 
-</div>
+## Despliegue en Netlify / GitHub
+* Repositorio listo para desplegar en Netlify, Vercel o Cloud Run.
+* Comando de build: `npm run build` o servir los archivos estáticos directamente.
